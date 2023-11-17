@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { getChatCompletion } from "../../openai";
+import { getChatCompletion } from "./openai";
+
+export const runtime = "edge";
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
-    const responseMessage = await getChatCompletion(message);
-    return NextResponse.json({ success: true, message: responseMessage });
+    const { messages } = await req.json();
+    return await getChatCompletion(messages);
   } catch (error) {
     console.log("Error getting a response for OpenAI", error);
     return NextResponse.json({

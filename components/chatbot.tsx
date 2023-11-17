@@ -15,41 +15,25 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useRef, useState } from "react";
-import { sendMessage } from "@/services/chatbot";
+import { useChat } from "ai/react";
 
 export function Chatbot() {
-  const textAreaRef = useRef(null);
-
-  const [messages, setMessages] = useState([
-    {
-      message:
-        "¡Hola! 🌟 Soy tu asistente virtual aquí para ayudarte. ¿En qué puedo asistirte hoy?",
-      timestamp: "nov",
-      role: "assistant",
-    },
-  ]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function handleNewMessage() {
-    const message = textAreaRef.current.value;
-    addMessage({ message, timestamp: new Date().toString(), role: "user" });
-
-    textAreaRef.current.value = "";
-
-    setIsLoading(true);
-    const response = await sendMessage(message);
-    addMessage({
-      message: response.message,
-      timestamp: new Date().toString(),
-      role: "assistant",
+  const { messages, isLoading, input, handleInputChange, handleSubmit } =
+    useChat({
+      initialMessages: [
+        {
+          id: "1",
+          role: "system",
+          content: "eres un chatbot que responde con acento paisa",
+        },
+        {
+          id: "2",
+          role: "assistant",
+          content:
+            "¡Hola! 🌟 Soy tu asistente virtual aquí para ayudarte. ¿En qué puedo asistirte hoy?",
+        },
+      ],
     });
-    setIsLoading(false);
-  }
-
-  function addMessage(message) {
-    setMessages((prevArray) => [...prevArray, message]);
-  }
 
   return (
     <section className="w-full h-screen bg-gray-50 flex flex-col">
@@ -104,62 +88,61 @@ export function Chatbot() {
         </div>
       </header>
       <div className="flex-grow overflow-auto p-4 space-y-4 flex flex-col bg-gray-100">
-        {messages.map((message, index) => (
-          <div
-            className={`p-4 rounded-lg shadow ${
-              message.role === "assistant"
-                ? "bg-blue-100 self-start"
-                : "bg-green-100 self-end"
-            }`}
-            key={index}
-          >
-            <p className="text-gray-900">{message.message}</p>
-            <p className="text-xs text-gray-700 mt-2">{message.timestamp}</p>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="p-4 rounded-lg bg-blue-100 shadow self-start flex items-center space-x-2">
-            <svg
-              className=" animate-spin h-5 w-5 text-gray-900"
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+        {messages
+          .filter((message) => message.role !== "system")
+          .map((message, i, row) => (
+            <div
+              className={`p-4 rounded-lg shadow ${
+                message.role === "assistant"
+                  ? "bg-blue-100 self-start"
+                  : "bg-green-100 self-end"
+              }`}
+              key={message.id}
             >
-              <line x1="12" x2="12" y1="2" y2="6" />
-              <line x1="12" x2="12" y1="18" y2="22" />
-              <line x1="4.93" x2="7.76" y1="4.93" y2="7.76" />
-              <line x1="16.24" x2="19.07" y1="16.24" y2="19.07" />
-              <line x1="2" x2="6" y1="12" y2="12" />
-              <line x1="18" x2="22" y1="12" y2="12" />
-              <line x1="4.93" x2="7.76" y1="19.07" y2="16.24" />
-              <line x1="16.24" x2="19.07" y1="7.76" y2="4.93" />
-            </svg>
-            <p className="text-gray-900">
-              ¡Estoy trabajando en tu solicitud! Dame un momentito... 🤖✨
-            </p>
-          </div>
-        )}
+              <p className="text-gray-900">{message.content}</p>
+            </div>
+          ))}
       </div>
       <div className="border-t border-gray-300 p-4 bg-white">
-        <div className="flex space-x-2 items-center">
+        <form className="flex space-x-2 items-center" onSubmit={handleSubmit}>
           <Textarea
             className="flex-grow rounded-md bg-white text-gray-900"
             placeholder="Type your message here..."
-            ref={textAreaRef}
+            value={input}
+            onChange={handleInputChange}
           />
           <Button
-            className="w-auto bg-black text-white"
-            onClick={handleNewMessage}
+            className="w-20 bg-black text-white"
+            type="submit"
+            disabled={isLoading}
           >
-            Send
+            {isLoading ? (
+              <svg
+                className=" animate-spin h-5 w-5 text-white-900"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <line x1="12" x2="12" y1="2" y2="6" />
+                <line x1="12" x2="12" y1="18" y2="22" />
+                <line x1="4.93" x2="7.76" y1="4.93" y2="7.76" />
+                <line x1="16.24" x2="19.07" y1="16.24" y2="19.07" />
+                <line x1="2" x2="6" y1="12" y2="12" />
+                <line x1="18" x2="22" y1="12" y2="12" />
+                <line x1="4.93" x2="7.76" y1="19.07" y2="16.24" />
+                <line x1="16.24" x2="19.07" y1="7.76" y2="4.93" />
+              </svg>
+            ) : (
+              "Send"
+            )}
           </Button>
-        </div>
+        </form>
       </div>
     </section>
   );
