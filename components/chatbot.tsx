@@ -64,7 +64,6 @@ export function Chatbot() {
         </div>
         <div className="flex items-center space-x-4 w-52">
           <Select
-            className="w-full"
             value={accent}
             onValueChange={(e) => handleAccentChange(e)}
             disabled={isLoading}
