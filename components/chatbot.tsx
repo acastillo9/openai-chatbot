@@ -36,7 +36,7 @@ export function Chatbot() {
       {
         id: "1",
         role: "system",
-        content: `eres un chatbot asistente que responde con acento ${newAccent}`,
+        content: `eres un chatbot asistente que responde con expresiones y modimos del acento ${newAccent}`,
       },
     ]);
     reload();
